@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;family=VT323:wght@400&amp;family=Rajdhani:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+
+<link href="style.css" rel="stylesheet"/></head>
+<body>
+<div class="app">
+<!-- NAV -->
+<nav>
+<div class="logo" onclick="goHome()">STAR<span>ZONE</span></div>
+<div class="nav-links">
+<a onclick="goHome()">Home</a>
+<a onclick="showPage('booking')">Book Now</a>
+<a onclick="showPage('contact')">Contact</a>
+<a id="nav-auth-link" onclick="handleAuthNav()">Sign In</a>
+
+<button class="dur-btn" id="dur-2" onclick="pickDur(2)">2 JAM</button>
+<button class="dur-btn" id="dur-3" onclick="pickDur(3)">3 JAM</button>
+<button class="dur-btn" id="dur-4" onclick="pickDur(4)">4 JAM</button>
+<button class="dur-btn" id="dur-5" onclick="pickDur(5)">5 JAM</button>
+<button class="dur-btn" id="dur-6" onclick="pickDur(6)">6 JAM</button>
+</div>
+<div style="margin-top:20px">
+<div class="booking-card-title"><span>📅</span> SELECT DATE</div>
+<div class="avail-grid" id="calendar"></div>
+</div>
+</div>
+<!-- Time slots -->
+<div class="booking-card" style="grid-column:1/-1">
+<div class="booking-card-title"><span>🕐</span> AVAILABLE TIME SLOTS</div>
+<div class="time-slots" id="time-slots"></div>
+</div>
+<!-- Summary -->
+<div class="order-summary">
+<div class="booking-card-title" style="margin-bottom:16px"><span>🧾</span> ORDER SUMMARY</div>
+<div class="order-row"><span class="label">Console</span><span class="value" id="sum-console">—</span></div>
+<div class="order-row"><span class="label">Controllers</span><span class="value" id="sum-ctrl">—</span></div>
+<div class="order-row"><span class="label">Tanggal</span><span class="value" id="sum-date">—</span></div>
+<div class="order-row"><span class="label">Waktu</span><span class="value" id="sum-time">—</span></div>
+<div class="order-row"><span class="label">Durasi</span><span class="value" id="sum-dur">—</span></div>
+<div class="order-row order-total"><span class="label">TOTAL</span><span class="value" id="sum-total">Rp —</span></div>
+<div style="margin-top:20px;text-align:center">
+<button class="btn btn-green" onclick="proceedToPayment()" style="font-size:10px;padding:14px 28px">▶ PROCEED TO PAYMENT</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ===== PAYMENT ===== -->
+<div class="page" id="page-payment">
+<div class="payment-page">
+<div class="payment-header">
+<h2>PAYMENT GATEWAY</h2>
+<p>Powered by Midtrans — transaksi aman &amp; terenkripsi</p>
+</div>
+<div class="midtrans-badge">
+<span class="shield">🛡️</span>
+<div><span class="text">Secured by Midtrans</span><span class="sub">SSL encrypted · Bank-grade security · BI licensed</span></div>
+</div>
+<div class="payment-method-tabs">
+<div class="pay-tab active" onclick="pickPayMethod('va',this)"><span class="tab-icon">🏦</span>VIRTUAL ACCOUNT</div>
+<div class="pay-tab" onclick="pickPayMethod('qris',this)"><span class="tab-icon">📱</span>QRIS</div>
+<div class="pay-tab" onclick="pickPayMethod('gopay',this)"><span class="tab-icon">💚</span>GOPAY</div>
+<div class="pay-tab" onclick="pickPayMethod('ovo',this)"><span class="tab-icon">💜</span>OVO</div>
+<div class="pay-tab" onclick="pickPayMethod('cc',this)"><span class="tab-icon">💳</span>KARTU KREDIT</div>
+</div>
+<div class="payment-card" id="pay-va">
+<div class="form-group"><label>PILIH BANK</label><select><option>BCA Virtual Account</option><option>BNI Virtual Account</option><option>Mandiri Bill Payment</option><option>BRI Virtual Account</option><option>Permata Virtual Account</option></select></div>
+<div class="form-group"><label>NAMA PEMILIK REKENING</label><input placeholder="Sesuai nama di rekening" type="text"/></div>
+</div>
+<div class="payment-card" id="pay-qris" style="display:none;text-align:center">
+<div style="width:140px;height:140px;background:var(--bg3);border:2px solid var(--border);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;"><span style="font-size:60px">📷</span></div>
+<div style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--cyan)">QR CODE MUNCUL SETELAH KONFIRMASI</div>
+<div style="font-family:'VT323',monospace;font-size:18px;color:var(--muted);margin-top:8px">Scan dengan app banking atau e-wallet manapun</div>
+</div>
+<div class="payment-card" id="pay-gopay" style="display:none">
+<div class="form-group"><label>NOMOR HP GOPAY</label><input placeholder="08xx-xxxx-xxxx" type="text"/></div>
+<div style="font-family:'VT323',monospace;font-size:18px;color:var(--muted)">Notifikasi dikirim ke app GoPay kamu</div>
+</div>
+<div class="payment-card" id="pay-ovo" style="display:none">
+<div class="form-group"><label>NOMOR HP OVO</label><input placeholder="08xx-xxxx-xxxx" type="text"/></div>
+<div style="font-family:'VT323',monospace;font-size:18px;color:var(--muted)">Notifikasi dikirim ke app OVO kamu</div>
+</div>
+<div class="payment-card" id="pay-cc" style="display:none">
+<div class="form-group"><label>CARD NUMBER</label><input maxlength="19" placeholder="1234  5678  9012  3456" type="text"/></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<div class="form-group"><label>EXPIRY</label><input maxlength="7" placeholder="MM / YY" type="text"/></div>
+<div class="form-group"><label>CVV</label><input maxlength="3" placeholder="•••" type="text"/></div>
+</div>
+<div class="form-group"><label>CARDHOLDER NAME</label><input placeholder="Nama sesuai kartu" type="text"/></div>
+</div>
+<div class="order-summary" style="margin-bottom:24px">
+<div class="order-row"><span class="label">Console</span><span class="value" id="pay-sum-console">—</span></div>
+<div class="order-row"><span class="label">Controllers</span><span class="value" id="pay-sum-ctrl">—</span></div>
+<div class="order-row"><span class="label">Waktu</span><span class="value" id="pay-sum-time">—</span></div>
+<div class="order-row order-total"><span class="label">TOTAL BAYAR</span><span class="value" id="pay-sum-total">Rp —</span></div>
+</div>
+<button class="btn btn-green btn-block" onclick="doPayment()">▶ BAYAR SEKARANG</button>
+<div style="text-align:center;margin-top:14px"><a onclick="showPage('booking')" style="font-family:'VT323',monospace;font-size:18px;color:var(--muted);cursor:pointer">← Ubah Booking</a></div>
+</div>
+</div>
+<!-- ===== SUCCESS ===== -->
+<div class="page" id="page-success">
+<div class="success-screen">
+<span class="success-icon">🏆</span>
+<h2>PAYMENT CONFIRMED!</h2>
+<p>Booking kamu berhasil. Sampai jumpa di Starzone!</p>
+<div class="booking-code" id="booking-code">SZ-000000</div>
+<p style="margin-bottom:4px;font-size:18px">Tunjukkan kode ini di kasir</p>
+<p id="success-detail" style="font-size:16px">—</p>
+<div style="margin-top:32px"><button class="btn" onclick="goHome()">← BACK TO HOME</button></div>
+</div>
+</div>
+<!-- ===== CONTACT ===== -->
+<div class="page" id="page-contact">
+<div class="contact-page">
+<div class="contact-header">
+<h2>CONTACT US</h2>
+<p>Got questions? We're here to help. Come visit or reach out anytime.</p>
+</div>
+<div class="contact-grid">
+<div class="contact-card"><span class="contact-icon">📧</span><span class="contact-card-label">EMAIL</span><div class="contact-card-value"><a href="mailto:hello@starzone.id">hello@starzone.id</a></div></div>
+<div class="contact-card"><span class="contact-icon">📞</span><span class="contact-card-label">PHONE / WHATSAPP</span><div class="contact-card-value"><a href="tel:+6281234567890">+62 812-3456-7890</a></div></div>
+<div class="contact-card"><span class="contact-icon">📍</span><span class="contact-card-label">ADDRESS</span><div class="contact-card-value">Jl. Buah Batu No. 123<br/>Bandung, Jawa Barat 40265</div></div>
+</div>
+<div class="contact-hours">
+<div class="contact-hours-title">⏰ OPERATING HOURS</div>
+<div class="hours-row"><span class="day">Senin – Jumat</span><span class="time open">10:00 – 22:00</span></div>
+<div class="hours-row"><span class="day">Sabtu</span><span class="time open">09:00 – 23:00</span></div>
+<div class="hours-row"><span class="day">Minggu</span><span class="time open">09:00 – 21:00</span></div>
+</div>
+</div>
+</div>
+</div>
+
+<script src="script.js"></script></body>
+</html>
