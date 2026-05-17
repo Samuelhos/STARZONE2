@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a12; --bg2: #12121e; --bg3: #1a1a2e;
+    --yellow: #f5c518; --pink: #ff4fcf; --cyan: #00e5ff;
+    --green: #39ff14; --red: #ff3a3a; --white: #e8e8f0; --muted: #888899;
+    --border: rgba(245,197,24,0.3);
+  }
+  body { background: var(--bg); color: var(--white); font-family: 'Rajdhani', sans-serif; font-size: 16px; min-height: 100vh; overflow-x: hidden; }
+  body::after { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px); pointer-events:none; z-index:9999; }
+  body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(0,229,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.04) 1px,transparent 1px); background-size:40px 40px; pointer-events:none; z-index:0; }
+  .app { position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; }
+
+  nav { display:flex; align-items:center; justify-content:space-between; padding:16px 32px; border-bottom:2px solid var(--border); background:rgba(10,10,18,0.95); position:sticky; top:0; z-index:100; }
+  .logo { font-family:'Press Start 2P',monospace; font-size:13px; color:var(--yellow); text-shadow:0 0 12px rgba(245,197,24,0.5),3px 3px 0 var(--pink); cursor:pointer; line-height:1.4; }
+  .logo span { color:var(--pink); }
+  nav .nav-links { display:flex; gap:20px; align-items:center; }
+  nav a { font-family:'Rajdhani',sans-serif; font-weight:600; font-size:15px; color:var(--muted); text-decoration:none; letter-spacing:1px; text-transform:uppercase; transition:color 0.2s; cursor:pointer; }
+  nav a:hover { color:var(--cyan); }
+
+  .btn { font-family:'Press Start 2P',monospace; font-size:9px; padding:10px 18px; border:2px solid var(--yellow); background:transparent; color:var(--yellow); cursor:pointer; letter-spacing:1px; transition:all 0.15s; text-transform:uppercase; }
+  .btn:hover { background:var(--yellow); color:var(--bg); }
+  .btn-pink { border-color:var(--pink); color:var(--pink); } .btn-pink:hover { background:var(--pink); color:var(--bg); }
+  .btn-cyan { border-color:var(--cyan); color:var(--cyan); } .btn-cyan:hover { background:var(--cyan); color:var(--bg); }
+  .btn-green { border-color:var(--green); color:var(--green); } .btn-green:hover { background:var(--green); color:var(--bg); }
+  .btn-block { width:100%; text-align:center; display:block; margin-top:12px; }
+
+  .page { display:none; flex:1; }
+  .page.active { display:block; }
+
+  .token-ticker { background:var(--bg3); border-top:2px solid var(--border); border-bottom:2px solid var(--border); overflow:hidden; padding:10px 0; }
+  .ticker-content { display:flex; gap:60px; width:max-content; animation:scroll-left 20s linear infinite; font-family:'Press Start 2P',monospace; font-size:8px; color:var(--yellow); letter-spacing:2px; opacity:0.7; }
+  @keyframes scroll-left { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+  /* HOME */
+  .hero { padding:80px 32px 60px; text-align:center; }
+  .hero-tag { font-family:'Press Start 2P',monospace; font-size:9px; color:var(--cyan); letter-spacing:3px; text-transform:uppercase; margin-bottom:20px; display:block; animation:blink 1.2s step-end infinite; }
+  @keyframes blink { 50%{opacity:0;} }
+  .hero h1 { font-family:'Press Start 2P',monospace; font-size:clamp(18px,3.5vw,32px); line-height:1.5; color:var(--yellow); text-shadow:4px 4px 0 var(--pink),8px 8px 0 rgba(255,79,207,0.3); margin-bottom:20px; }
+  .hero p { font-family:'VT323',monospace; font-size:24px; color:var(--muted); max-width:560px; margin:0 auto 36px; line-height:1.5; }
+  .hero-btns { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+  .pixel-divider { width:100%; height:4px; background:repeating-linear-gradient(90deg,var(--yellow) 0px,var(--yellow) 8px,transparent 8px,transparent 16px); opacity:0.4; }
+  .section-title { font-family:'Press Start 2P',monospace; font-size:11px; color:var(--cyan); text-align:center; letter-spacing:2px; text-transform:uppercase; margin-bottom:36px; }
+  .consoles-section { padding:48px 32px; }
+  .consoles-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; max-width:820px; margin:0 auto; }
+  .console-card { background:var(--bg2); border:2px solid var(--border); padding:28px 20px; text-align:center; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; }
+  .console-card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,transparent 60%,rgba(245,197,24,0.05)); pointer-events:none; }
+  .console-card:hover { border-color:var(--yellow); transform:translateY(-3px); }
+  .console-icon { font-size:48px; display:block; margin-bottom:16px; }
+  .console-name { font-family:'Press Start 2P',monospace; font-size:9px; color:var(--white); margin-bottom:8px; letter-spacing:1px; }
+  .console-price { font-family:'VT323',monospace; font-size:22px; color:var(--green); margin-bottom:14px; }
+  .console-badge { position:absolute; top:10px; right:10px; font-family:'Press Start 2P',monospace; font-size:7px; padding:4px 6px; border:2px solid; }
+  .badge-cyan { color:var(--cyan); border-color:var(--cyan); } .badge-green { color:var(--green); border-color:var(--green); }
+  .game-tags { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:8px; }
+  .game-tag { font-family:'VT323',monospace; font-size:15px; color:var(--muted); border:1px solid var(--border); padding:3px 8px; }
+  .how-section { padding:48px 32px; background:var(--bg2); }
+  .steps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:24px; max-width:960px; margin:0 auto; }
+  .step { text-align:center; padding:24px 16px; border:1px solid var(--border); background:var(--bg); }
+  .step-num { font-family:'Press Start 2P',monospace; font-size:28px; color:var(--yellow); display:block; margin-bottom:12px; text-shadow:2px 2px 0 var(--pink); }
+  .step h3 { font-family:'Press Start 2P',monospace; font-size:8px; color:var(--white); margin-bottom:10px; letter-spacing:1px; line-height:1.6; }
+  .step p { font-family:'VT323',monospace; font-size:18px; color:var(--muted); }
+
+  /* AUTH */
+  .auth-page { display:flex; align-items:center; justify-content:center; min-height:calc(100vh - 70px); padding:40px 20px; }
+  .auth-box { background:var(--bg2); border:2px solid var(--border); padding:40px; width:100%; max-width:440px; position:relative; }
+  .auth-box::before { content:''; position:absolute; top:6px; left:6px; right:-6px; bottom:-6px; border:2px solid var(--pink); z-index:-1; opacity:0.3; }
+  .auth-title { font-family:'Press Start 2P',monospace; font-size:13px; color:var(--yellow); margin-bottom:8px; text-shadow:2px 2px 0 var(--pink); }
+  .auth-sub { font-family:'VT323',monospace; font-size:20px; color:var(--muted); margin-bottom:32px; }
+  .auth-tabs { display:flex; margin-bottom:28px; }
+  .auth-tab { flex:1; font-family:'Press Start 2P',monospace; font-size:8px; padding:10px; text-align:center; cursor:pointer; letter-spacing:1px; border:2px solid var(--border); background:transparent; color:var(--muted); transition:all 0.15s; }
+  .auth-tab.active { background:var(--yellow); color:var(--bg); border-color:var(--yellow); }
+  .form-group { margin-bottom:18px; }
+  label { display:block; font-family:'Press Start 2P',monospace; font-size:8px; color:var(--cyan); margin-bottom:8px; letter-spacing:1px; }
+  input[type="text"],input[type="email"],input[type="password"],select { width:100%; padding:12px 14px; background:var(--bg); border:2px solid var(--border); color:var(--white); font-family:'VT323',monospace; font-size:20px; outline:none; transition:border-color 0.2s; appearance:none; -webkit-appearance:none; }
+  input:focus,select:focus { border-color:var(--yellow); }
+  select { cursor:pointer; } select option { background:var(--bg2); }
+  .alert { font-family:'VT323',monospace; font-size:18px; padding:12px 16px; border:1px solid; margin-bottom:16px; }
+  .alert-error { border-color:var(--red); color:var(--red); background:rgba(255,58,58,0.08); }
+
+  /* BOOKING */
+  .booking-page { padding:40px 32px; max-width:900px; margin:0 auto; }
+  .booking-header { margin-bottom:36px; }
+  .booking-header h2 { font-family:'Press Start 2P',monospace; font-size:14px; color:var(--yellow); text-shadow:2px 2px 0 var(--pink); margin-bottom:10px; }
+  .booking-header p { font-family:'VT323',monospace; font-size:22px; color:var(--muted); }
+  .booking-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; }
+  @media(max-width:640px){.booking-grid{grid-template-columns:1fr;}}
+  .booking-card { background:var(--bg2); border:2px solid var(--border); padding:28px; }
+  .booking-card-title { font-family:'Press Start 2P',monospace; font-size:9px; color:var(--cyan); margin-bottom:20px; letter-spacing:1px; display:flex; align-items:center; gap:10px; }
+  .booking-card-title span { font-size:16px; }
+
+  .console-selector { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .console-option { border:2px solid var(--border); padding:14px 10px; text-align:center; cursor:pointer; transition:all 0.2s; background:transparent; }
+  .console-option:hover { border-color:var(--yellow); }
+  .console-option.selected { border-color:var(--yellow); background:rgba(245,197,24,0.1); }
+  .console-option .icon { font-size:28px; display:block; margin-bottom:6px; }
+  .console-option .name { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--white); display:block; line-height:1.5; }
+  .console-option .price { font-family:'VT323',monospace; font-size:16px; color:var(--green); display:block; }
+
+  .game-list-wrap { margin-top:20px; }
+  .game-list-title { font-family:'Press Start 2P',monospace; font-size:8px; color:var(--cyan); margin-bottom:12px; letter-spacing:1px; }
+  .game-list { display:flex; flex-direction:column; gap:6px; }
+  .game-list-item { font-family:'VT323',monospace; font-size:19px; color:var(--white); border-left:3px solid var(--yellow); padding-left:10px; }
+
+  /* CONTROLLER PICKER */
+  .controller-picker { margin-top:20px; }
+  .controller-picker-title { font-family:'Press Start 2P',monospace; font-size:8px; color:var(--cyan); margin-bottom:14px; letter-spacing:1px; }
+  .controller-options { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .ctrl-btn {
+    border:2px solid var(--border); background:transparent;
+    padding:12px 6px; text-align:center; cursor:pointer; transition:all 0.2s;
+  }
+  .ctrl-btn:hover { border-color:var(--pink); }
+  .ctrl-btn.selected { border-color:var(--pink); background:rgba(255,79,207,0.1); }
+  .ctrl-btn .ctrl-icon { font-size:22px; display:block; margin-bottom:4px; }
+  .ctrl-btn .ctrl-label { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--white); display:block; line-height:1.5; }
+  .ctrl-note { font-family:'VT323',monospace; font-size:17px; color:var(--muted); margin-top:10px; }
+
+  .duration-buttons { display:flex; flex-wrap:wrap; gap:8px; }
+  .dur-btn { font-family:'Press Start 2P',monospace; font-size:8px; padding:8px 12px; border:2px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; transition:all 0.15s; }
+  .dur-btn:hover { border-color:var(--cyan); color:var(--cyan); }
+  .dur-btn.selected { border-color:var(--cyan); background:rgba(0,229,255,0.1); color:var(--cyan); }
+
+  .avail-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-top:8px; }
+  .avail-day-label { font-family:'Press Start 2P',monospace; font-size:6px; color:var(--muted); text-align:center; padding:4px 0; }
+  .avail-day { border:1px solid var(--border); padding:8px 4px; text-align:center; cursor:pointer; transition:all 0.2s; font-family:'VT323',monospace; font-size:18px; color:var(--white); }
+  .avail-day:hover { border-color:var(--yellow); }
+  .avail-day.selected { border-color:var(--yellow); background:rgba(245,197,24,0.15); color:var(--yellow); }
+  .avail-day.unavail { color:var(--muted); border-color:transparent; cursor:default; opacity:0.4; }
+  .avail-day.past { opacity:0.2; cursor:default; }
+
+  .time-slots { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }
+  .time-slot { border:1px solid var(--border); padding:10px; text-align:center; cursor:pointer; transition:all 0.15s; font-family:'VT323',monospace; font-size:18px; color:var(--white); }
+  .time-slot:hover { border-color:var(--green); }
+  .time-slot.selected { border-color:var(--green); background:rgba(57,255,20,0.1); color:var(--green); }
+  .time-slot.full { border-color:transparent; color:var(--muted); cursor:default; background:rgba(255,58,58,0.05); text-decoration:line-through; opacity:0.5; }
+
+  .order-summary { background:var(--bg3); border:2px solid var(--border); padding:24px; grid-column:1/-1; }
+  .order-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); font-family:'VT323',monospace; font-size:20px; }
+  .order-row:last-child { border-bottom:none; }
+  .order-row .label { color:var(--muted); }
+  .order-row .value { color:var(--white); }
+  .order-total .label { color:var(--yellow)!important; font-family:'Press Start 2P',monospace!important; font-size:11px!important; }
+  .order-total .value { color:var(--yellow)!important; font-family:'Press Start 2P',monospace!important; font-size:11px!important; text-shadow:1px 1px 0 var(--pink); }
+
+  .pixel-progress { display:flex; gap:8px; justify-content:center; align-items:center; margin-bottom:40px; }
+  .progress-step { display:flex; align-items:center; gap:8px; }
+  .progress-dot { width:12px; height:12px; border:2px solid var(--border); background:transparent; }
+  .progress-dot.active { background:var(--yellow); border-color:var(--yellow); }
+  .progress-dot.done { background:var(--green); border-color:var(--green); }
+  .progress-label { font-family:'Press Start 2P',monospace; font-size:7px; color:var(--muted); letter-spacing:1px; }
+  .progress-label.active { color:var(--yellow); } .progress-label.done { color:var(--green); }
+  .progress-line { width:32px; height:2px; background:var(--border); }
+  .progress-line.done { background:var(--green); }
+
+  /* PAYMENT */
+  .payment-page { padding:40px 32px; max-width:600px; margin:0 auto; }
+  .payment-header { margin-bottom:32px; }
+  .payment-header h2 { font-family:'Press Start 2P',monospace; font-size:13px; color:var(--yellow); text-shadow:2px 2px 0 var(--pink); margin-bottom:10px; }
+  .payment-header p { font-family:'VT323',monospace; font-size:20px; color:var(--muted); }
+  .payment-method-tabs { display:flex; margin-bottom:24px; flex-wrap:wrap; }
+  .pay-tab { flex:1; font-family:'Press Start 2P',monospace; font-size:7px; padding:12px 8px; text-align:center; cursor:pointer; border:2px solid var(--border); background:transparent; color:var(--muted); transition:all 0.15s; min-width:80px; }
+  .pay-tab.active { background:rgba(0,229,255,0.1); color:var(--cyan); border-color:var(--cyan); }
+  .pay-tab .tab-icon { font-size:18px; display:block; margin-bottom:6px; }
+  .payment-card { background:var(--bg2); border:2px solid var(--border); padding:28px; margin-bottom:20px; }
+  .midtrans-badge { display:flex; align-items:center; gap:12px; background:var(--bg3); border:1px solid var(--border); padding:14px 16px; margin-bottom:20px; }
+  .midtrans-badge .shield { font-size:22px; }
+  .midtrans-badge .text { font-family:'VT323',monospace; font-size:18px; color:var(--green); }
+  .midtrans-badge .sub { font-family:'VT323',monospace; font-size:16px; color:var(--muted); display:block; }
+
+  /* SUCCESS */
+  .success-screen { text-align:center; padding:60px 20px; }
+  .success-icon { font-size:64px; margin-bottom:24px; display:block; animation:bounce 0.6s ease; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .success-screen h2 { font-family:'Press Start 2P',monospace; font-size:14px; color:var(--green); margin-bottom:12px; text-shadow:2px 2px 0 var(--cyan); }
+  .success-screen p { font-family:'VT323',monospace; font-size:22px; color:var(--muted); margin-bottom:8px; }
+  .booking-code { font-family:'Press Start 2P',monospace; font-size:16px; color:var(--yellow); border:2px dashed var(--yellow); padding:16px 28px; display:inline-block; margin:20px 0; text-shadow:1px 1px 0 var(--pink); }
+
+  /* GATE */
+  .gate-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:500; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .gate-box { background:var(--bg2); border:2px solid var(--yellow); padding:40px; max-width:400px; width:100%; text-align:center; position:relative; }
+  .gate-box::before { content:''; position:absolute; top:6px; left:6px; right:-6px; bottom:-6px; border:2px solid var(--pink); z-index:-1; opacity:0.3; }
+  .gate-title { font-family:'Press Start 2P',monospace; font-size:11px; color:var(--yellow); margin-bottom:10px; line-height:1.6; text-shadow:2px 2px 0 var(--pink); }
+  .gate-sub { font-family:'VT323',monospace; font-size:20px; color:var(--muted); margin-bottom:28px; }
+  .gate-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+
+  /* CONTACT */
+  .contact-page { padding:60px 32px; max-width:860px; margin:0 auto; }
+  .contact-header { margin-bottom:48px; text-align:center; }
+  .contact-header h2 { font-family:'Press Start 2P',monospace; font-size:14px; color:var(--yellow); text-shadow:2px 2px 0 var(--pink); margin-bottom:12px; }
+  .contact-header p { font-family:'VT323',monospace; font-size:22px; color:var(--muted); }
+  .contact-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:24px; margin-bottom:48px; }
+  .contact-card { background:var(--bg2); border:2px solid var(--border); padding:32px 24px; text-align:center; transition:border-color 0.2s; }
+  .contact-card:hover { border-color:var(--yellow); }
+  .contact-icon { font-size:40px; display:block; margin-bottom:18px; }
+  .contact-card-label { font-family:'Press Start 2P',monospace; font-size:8px; color:var(--cyan); letter-spacing:1px; margin-bottom:14px; display:block; }
+  .contact-card-value { font-family:'VT323',monospace; font-size:21px; color:var(--white); line-height:1.5; }
+  .contact-card-value a { color:var(--yellow); text-decoration:none; }
+  .contact-card-value a:hover { color:var(--pink); }
+  .contact-hours { background:var(--bg2); border:2px solid var(--border); padding:32px; max-width:500px; margin:0 auto; }
+  .contact-hours-title { font-family:'Press Start 2P',monospace; font-size:9px; color:var(--cyan); letter-spacing:1px; margin-bottom:20px; text-align:center; }
+  .hours-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-family:'VT323',monospace; font-size:20px; }
+  .hours-row:last-child { border-bottom:none; }
+  .hours-row .day { color:var(--muted); }
+  .hours-row .time.open { color:var(--green); }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="goHome()">STAR<span>ZONE</span></div>
+  <div class="nav-links">
+    <a onclick="goHome()">Home</a>
+    <a onclick="tryBooking()">Book Now</a>
+    <a onclick="showPage('contact')">Contact</a>
+    <a onclick="handleAuthNav()" id="nav-auth-link">Sign In</a>
+    <button class="btn btn-pink" onclick="tryBooking()">INSERT COIN</button>
+  </div>
+</nav>
+
+<!-- TICKER -->
+<div class="token-ticker">
+  <div class="ticker-content">
+    <span>⭐ PS5 AVAILABLE NOW</span><span>⭐ NINTENDO SWITCH OLED</span>
+    <span>⭐ BOOK ONLINE — NO QUEUE</span><span>⭐ WEEKLY PROMO — HEMAT 20%</span>
+    <span>⭐ PS4 PRO — 2 UNITS</span><span>⭐ PS5 AVAILABLE NOW</span>
+    <span>⭐ NINTENDO SWITCH OLED</span><span>⭐ BOOK ONLINE — NO QUEUE</span>
+    <span>⭐ WEEKLY PROMO — HEMAT 20%</span><span>⭐ PS4 PRO — 2 UNITS</span>
+  </div>
+</div>
+
+<!-- AUTH GATE -->
+<div class="gate-overlay" id="auth-gate" style="display:none">
+  <div class="gate-box">
+    <div class="gate-title">LOGIN REQUIRED</div>
+    <div class="gate-sub">Kamu harus sign in dulu sebelum bisa booking sesi bermain.</div>
+    <div class="gate-btns">
+      <button class="btn" onclick="openAuthFromGate('signin')">SIGN IN</button>
+      <button class="btn btn-pink" onclick="openAuthFromGate('signup')">SIGN UP</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HOME ===== -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <span class="hero-tag">▶ NOW ACCEPTING BOOKINGS</span>
+    <h1>WELCOME TO<br>STARZONE</h1>
+    <p>Rent the latest consoles by the hour. PlayStation & Nintendo Switch — ready to play.</p>
+    <div class="hero-btns">
+      <button class="btn" onclick="tryBooking()">CHECK AVAILABILITY</button>
+      <button class="btn btn-pink" onclick="showPage('auth'); switchAuthTab('signup')">CREATE ACCOUNT</button>
+    </div>
+  </div>
+  <div class="pixel-divider"></div>
+  <div class="consoles-section">
+    <div class="section-title">— SELECT YOUR CONSOLE —</div>
+    <div class="consoles-grid">
+      <div class="console-card" onclick="selectConsoleFromHome('ps5')">
+        <div class="console-badge badge-cyan">HOT</div>
+        <span class="console-icon">🎮</span>
+        <div class="console-name">PLAYSTATION 5</div>
+        <div class="console-price">Rp 25.000 / jam</div>
+        <div class="game-tags"><span class="game-tag">Spider-Man 2</span><span class="game-tag">God of War</span><span class="game-tag">FC 25</span><span class="game-tag">Tekken 8</span><span class="game-tag">Hogwarts Legacy</span></div>
+      </div>
+      <div class="console-card" onclick="selectConsoleFromHome('ps4')">
+        <span class="console-icon">🕹️</span>
+        <div class="console-name">PLAYSTATION 4</div>
+        <div class="console-price">Rp 15.000 / jam</div>
+        <div class="game-tags"><span class="game-tag">GTA V</span><span class="game-tag">The Last of Us</span><span class="game-tag">Mortal Kombat 11</span><span class="game-tag">Minecraft</span><span class="game-tag">PES 2021</span></div>
+      </div>
+      <div class="console-card" onclick="selectConsoleFromHome('switch')">
+        <div class="console-badge badge-green">NEW</div>
+        <span class="console-icon">📺</span>
+        <div class="console-name">NINTENDO SWITCH</div>
+        <div class="console-price">Rp 20.000 / jam</div>
+        <div class="game-tags"><span class="game-tag">Mario Kart 8</span><span class="game-tag">Zelda: TotK</span><span class="game-tag">Smash Bros</span><span class="game-tag">Animal Crossing</span><span class="game-tag">Pokémon SV</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="how-section">
+    <div class="section-title">— HOW TO PLAY —</div>
+    <div class="steps-grid">
+      <div class="step"><span class="step-num">01</span><h3>CREATE ACCOUNT</h3><p>Sign up dulu. Gratis dan cepat.</p></div>
+      <div class="step"><span class="step-num">02</span><h3>CHOOSE CONSOLE</h3><p>PS4, PS5, atau Nintendo Switch.</p></div>
+      <div class="step"><span class="step-num">03</span><h3>PICK DATE & TIME</h3><p>Pilih slot yang tersedia.</p></div>
+      <div class="step"><span class="step-num">04</span><h3>PAY & PLAY</h3><p>Bayar via Midtrans. Langsung main!</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AUTH ===== -->
+<div class="page" id="page-auth">
+  <div class="auth-page">
+    <div class="auth-box">
+      <div class="auth-title">STARZONE</div>
+      <div class="auth-sub">Sign in or create your player account</div>
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-signin" onclick="switchAuthTab('signin')">SIGN IN</div>
+        <div class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">SIGN UP</div>
+      </div>
+      <div id="signin-form">
+        <div id="auth-error" class="alert alert-error" style="display:none"></div>
+        <div class="form-group"><label>EMAIL ADDRESS</label><input type="email" id="si-email" placeholder="player@example.com"></div>
+        <div class="form-group"><label>PASSWORD</label><input type="password" id="si-pass" placeholder="••••••••"></div>
+        <button class="btn btn-block" onclick="doSignIn()">▶ SIGN IN</button>
+        <div style="text-align:center;margin-top:16px"><a style="font-family:'VT323',monospace;font-size:18px;color:var(--cyan);cursor:pointer" onclick="switchAuthTab('signup')">Belum punya akun? Sign up →</a></div>
+      </div>
+      <div id="signup-form" style="display:none">
+        <div id="auth-error-su" class="alert alert-error" style="display:none"></div>
+        <div class="form-group"><label>FULL NAME</label><input type="text" id="su-name" placeholder="Budi Santoso"></div>
+        <div class="form-group"><label>EMAIL ADDRESS</label><input type="email" id="su-email" placeholder="player@example.com"></div>
+        <div class="form-group"><label>PHONE NUMBER</label><input type="text" id="su-phone" placeholder="08xx-xxxx-xxxx"></div>
+        <div class="form-group"><label>PASSWORD</label><input type="password" id="su-pass" placeholder="Min. 8 karakter"></div>
+        <button class="btn btn-pink btn-block" onclick="doSignUp()">▶ CREATE ACCOUNT</button>
+        <div style="text-align:center;margin-top:16px"><a style="font-family:'VT323',monospace;font-size:18px;color:var(--cyan);cursor:pointer" onclick="switchAuthTab('signin')">Sudah punya akun? Sign in →</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BOOKING ===== -->
+<div class="page" id="page-booking">
+  <div class="booking-page">
+    <div class="pixel-progress">
+      <div class="progress-step"><div class="progress-dot active" id="pd1"></div><span class="progress-label active" id="pl1">CONSOLE</span></div>
+      <div class="progress-line" id="pline1"></div>
+      <div class="progress-step"><div class="progress-dot" id="pd2"></div><span class="progress-label" id="pl2">SCHEDULE</span></div>
+      <div class="progress-line" id="pline2"></div>
+      <div class="progress-step"><div class="progress-dot" id="pd3"></div><span class="progress-label" id="pl3">REVIEW</span></div>
+    </div>
+    <div class="booking-header">
+      <h2>BOOK A SESSION</h2>
+      <p>Pick your console, controllers, date, time, and duration.</p>
+    </div>
+    <div class="booking-grid">
+
+      <!-- Console + games + controllers -->
+      <div class="booking-card">
+        <div class="booking-card-title"><span>🎮</span> CHOOSE CONSOLE</div>
+        <div class="console-selector">
+          <div class="console-option" id="co-ps5" onclick="pickConsole('ps5')">
+            <span class="icon">🎮</span><span class="name">PS5</span><span class="price">Rp 25rb/jam</span>
+          </div>
+          <div class="console-option" id="co-ps4" onclick="pickConsole('ps4')">
+            <span class="icon">🕹️</span><span class="name">PS4</span><span class="price">Rp 15rb/jam</span>
+          </div>
+          <div class="console-option" id="co-switch" onclick="pickConsole('switch')" style="grid-column:1/-1">
+            <span class="icon">📺</span><span class="name">Nintendo Switch</span><span class="price">Rp 20rb/jam</span>
+          </div>
+        </div>
+
+        <!-- Game list (shows after console pick) -->
+        <div class="game-list-wrap" id="game-list-wrap" style="display:none">
+          <div class="game-list-title">▶ AVAILABLE GAMES</div>
+          <div class="game-list" id="game-list"></div>
+        </div>
+
+        <!-- Controller picker (shows after console pick) -->
+        <div class="controller-picker" id="ctrl-picker" style="display:none">
+          <div class="controller-picker-title">▶ NUMBER OF CONTROLLERS</div>
+          <div class="controller-options">
+            <div class="ctrl-btn" id="ctrl-1" onclick="pickCtrl(1)">
+              <span class="ctrl-icon">🕹️</span>
+              <span class="ctrl-label">1<br>PLAYER</span>
+            </div>
+            <div class="ctrl-btn" id="ctrl-2" onclick="pickCtrl(2)">
+              <span class="ctrl-icon">🕹️🕹️</span>
+              <span class="ctrl-label">2<br>PLAYERS</span>
+            </div>
+            <div class="ctrl-btn" id="ctrl-3" onclick="pickCtrl(3)">
+              <span class="ctrl-icon">🕹️🕹️🕹️</span>
+              <span class="ctrl-label">3<br>PLAYERS</span>
+            </div>
+            <div class="ctrl-btn" id="ctrl-4" onclick="pickCtrl(4)">
+              <span class="ctrl-icon">🕹️🕹️🕹️🕹️</span>
+              <span class="ctrl-label">4<br>PLAYERS</span>
+            </div>
+          </div>
+          <div class="ctrl-note" id="ctrl-note">1 controller included. Extra controllers +Rp 5.000/jam each.</div>
+        </div>
+      </div>
+
+      <!-- Duration + Calendar -->
+      <div class="booking-card">
+        <div class="booking-card-title"><span>⏱️</span> DURATION</div>
+        <div class="duration-buttons">
+          <button class="dur-btn" id="dur-1" onclick="pickDur(1)">1 JAM</button>
+          <button class="dur-btn" id="dur-2" onclick="pickDur(2)">2 JAM</button>
+          <button class="dur-btn" id="dur-3" onclick="pickDur(3)">3 JAM</button>
+          <button class="dur-btn" id="dur-4" onclick="pickDur(4)">4 JAM</button>
+          <button class="dur-btn" id="dur-5" onclick="pickDur(5)">5 JAM</button>
+          <button class="dur-btn" id="dur-6" onclick="pickDur(6)">6 JAM</button>
+        </div>
+        <div style="margin-top:20px">
+          <div class="booking-card-title"><span>📅</span> SELECT DATE</div>
+          <div class="avail-grid" id="calendar"></div>
+        </div>
+      </div>
+
+      <!-- Time slots -->
+      <div class="booking-card" style="grid-column:1/-1">
+        <div class="booking-card-title"><span>🕐</span> AVAILABLE TIME SLOTS</div>
+        <div class="time-slots" id="time-slots"></div>
+      </div>
+
+      <!-- Summary -->
+      <div class="order-summary">
+        <div class="booking-card-title" style="margin-bottom:16px"><span>🧾</span> ORDER SUMMARY</div>
+        <div class="order-row"><span class="label">Console</span><span class="value" id="sum-console">—</span></div>
+        <div class="order-row"><span class="label">Controllers</span><span class="value" id="sum-ctrl">—</span></div>
+        <div class="order-row"><span class="label">Tanggal</span><span class="value" id="sum-date">—</span></div>
+        <div class="order-row"><span class="label">Waktu</span><span class="value" id="sum-time">—</span></div>
+        <div class="order-row"><span class="label">Durasi</span><span class="value" id="sum-dur">—</span></div>
+        <div class="order-row order-total"><span class="label">TOTAL</span><span class="value" id="sum-total">Rp —</span></div>
+        <div style="margin-top:20px;text-align:center">
+          <button class="btn btn-green" onclick="proceedToPayment()" style="font-size:10px;padding:14px 28px">▶ PROCEED TO PAYMENT</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAYMENT ===== -->
+<div class="page" id="page-payment">
+  <div class="payment-page">
+    <div class="payment-header">
+      <h2>PAYMENT GATEWAY</h2>
+      <p>Powered by Midtrans — transaksi aman &amp; terenkripsi</p>
+    </div>
+    <div class="midtrans-badge">
+      <span class="shield">🛡️</span>
+      <div><span class="text">Secured by Midtrans</span><span class="sub">SSL encrypted · Bank-grade security · BI licensed</span></div>
+    </div>
+    <div class="payment-method-tabs">
+      <div class="pay-tab active" onclick="pickPayMethod('va',this)"><span class="tab-icon">🏦</span>VIRTUAL ACCOUNT</div>
+      <div class="pay-tab" onclick="pickPayMethod('qris',this)"><span class="tab-icon">📱</span>QRIS</div>
+      <div class="pay-tab" onclick="pickPayMethod('gopay',this)"><span class="tab-icon">💚</span>GOPAY</div>
+      <div class="pay-tab" onclick="pickPayMethod('ovo',this)"><span class="tab-icon">💜</span>OVO</div>
+      <div class="pay-tab" onclick="pickPayMethod('cc',this)"><span class="tab-icon">💳</span>KARTU KREDIT</div>
+    </div>
+    <div class="payment-card" id="pay-va">
+      <div class="form-group"><label>PILIH BANK</label><select><option>BCA Virtual Account</option><option>BNI Virtual Account</option><option>Mandiri Bill Payment</option><option>BRI Virtual Account</option><option>Permata Virtual Account</option></select></div>
+      <div class="form-group"><label>NAMA PEMILIK REKENING</label><input type="text" placeholder="Sesuai nama di rekening"></div>
+    </div>
+    <div class="payment-card" id="pay-qris" style="display:none;text-align:center">
+      <div style="width:140px;height:140px;background:var(--bg3);border:2px solid var(--border);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;"><span style="font-size:60px">📷</span></div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--cyan)">QR CODE MUNCUL SETELAH KONFIRMASI</div>
+      <div style="font-family:'VT323',monospace;font-size:18px;color:var(--muted);margin-top:8px">Scan dengan app banking atau e-wallet manapun</div>
+    </div>
+    <div class="payment-card" id="pay-gopay" style="display:none">
+      <div class="form-group"><label>NOMOR HP GOPAY</label><input type="text" placeholder="08xx-xxxx-xxxx"></div>
+      <div style="font-family:'VT323',monospace;font-size:18px;color:var(--muted)">Notifikasi dikirim ke app GoPay kamu</div>
+    </div>
+    <div class="payment-card" id="pay-ovo" style="display:none">
+      <div class="form-group"><label>NOMOR HP OVO</label><input type="text" placeholder="08xx-xxxx-xxxx"></div>
+      <div style="font-family:'VT323',monospace;font-size:18px;color:var(--muted)">Notifikasi dikirim ke app OVO kamu</div>
+    </div>
+    <div class="payment-card" id="pay-cc" style="display:none">
+      <div class="form-group"><label>CARD NUMBER</label><input type="text" placeholder="1234  5678  9012  3456" maxlength="19"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="form-group"><label>EXPIRY</label><input type="text" placeholder="MM / YY" maxlength="7"></div>
+        <div class="form-group"><label>CVV</label><input type="text" placeholder="•••" maxlength="3"></div>
+      </div>
+      <div class="form-group"><label>CARDHOLDER NAME</label><input type="text" placeholder="Nama sesuai kartu"></div>
+    </div>
+    <div class="order-summary" style="margin-bottom:24px">
+      <div class="order-row"><span class="label">Console</span><span class="value" id="pay-sum-console">—</span></div>
+      <div class="order-row"><span class="label">Controllers</span><span class="value" id="pay-sum-ctrl">—</span></div>
+      <div class="order-row"><span class="label">Waktu</span><span class="value" id="pay-sum-time">—</span></div>
+      <div class="order-row order-total"><span class="label">TOTAL BAYAR</span><span class="value" id="pay-sum-total">Rp —</span></div>
+    </div>
+    <button class="btn btn-green btn-block" onclick="doPayment()">▶ BAYAR SEKARANG</button>
+    <div style="text-align:center;margin-top:14px"><a style="font-family:'VT323',monospace;font-size:18px;color:var(--muted);cursor:pointer" onclick="showPage('booking')">← Ubah Booking</a></div>
+  </div>
+</div>
+
+<!-- ===== SUCCESS ===== -->
+<div class="page" id="page-success">
+  <div class="success-screen">
+    <span class="success-icon">🏆</span>
+    <h2>PAYMENT CONFIRMED!</h2>
+    <p>Booking kamu berhasil. Sampai jumpa di Starzone!</p>
+    <div class="booking-code" id="booking-code">SZ-000000</div>
+    <p style="margin-bottom:4px;font-size:18px">Tunjukkan kode ini di kasir</p>
+    <p style="font-size:16px" id="success-detail">—</p>
+    <div style="margin-top:32px"><button class="btn" onclick="goHome()">← BACK TO HOME</button></div>
+  </div>
+</div>
+
+<!-- ===== CONTACT ===== -->
+<div class="page" id="page-contact">
+  <div class="contact-page">
+    <div class="contact-header">
+      <h2>CONTACT US</h2>
+      <p>Got questions? We're here to help. Come visit or reach out anytime.</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-card"><span class="contact-icon">📧</span><span class="contact-card-label">EMAIL</span><div class="contact-card-value"><a href="mailto:hello@starzone.id">hello@starzone.id</a></div></div>
+      <div class="contact-card"><span class="contact-icon">📞</span><span class="contact-card-label">PHONE / WHATSAPP</span><div class="contact-card-value"><a href="tel:+6281234567890">+62 812-3456-7890</a></div></div>
+      <div class="contact-card"><span class="contact-icon">📍</span><span class="contact-card-label">ADDRESS</span><div class="contact-card-value">Jl. Buah Batu No. 123<br>Bandung, Jawa Barat 40265</div></div>
+    </div>
+    <div class="contact-hours">
+      <div class="contact-hours-title">⏰ OPERATING HOURS</div>
+      <div class="hours-row"><span class="day">Senin – Jumat</span><span class="time open">10:00 – 22:00</span></div>
+      <div class="hours-row"><span class="day">Sabtu</span><span class="time open">09:00 – 23:00</span></div>
+      <div class="hours-row"><span class="day">Minggu</span><span class="time open">09:00 – 21:00</span></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const STATE = { user:null, console:null, controllers:null, duration:null, date:null, time:null, pendingBooking:false };
+const CTRL_FEE = 5000; // per extra controller per hour
+
+const CONSOLES = {
+  ps5:    { name:'PlayStation 5',   price:25000, icon:'🎮', maxCtrl:4,
+            games:['Spider-Man 2','God of War: Ragnarök','FC 25','Tekken 8','Hogwarts Legacy','Mortal Kombat 1','Final Fantasy VII Rebirth'] },
+  ps4:    { name:'PlayStation 4',   price:15000, icon:'🕹️', maxCtrl:4,
+            games:['GTA V','The Last of Us Remastered','Mortal Kombat 11','Minecraft','PES 2021','Uncharted 4','Red Dead Redemption 2'] },
+  switch: { name:'Nintendo Switch', price:20000, icon:'📺', maxCtrl:4,
+            games:['Mario Kart 8 Deluxe','Zelda: Tears of the Kingdom','Super Smash Bros. Ultimate','Animal Crossing','Pokémon Scarlet/Violet','Splatoon 3','Luigi\'s Mansion 3'] },
+};
+
+const TIME_SLOTS = [
+  {time:'09:00',avail:true},{time:'10:00',avail:true},{time:'11:00',avail:false},
+  {time:'12:00',avail:true},{time:'13:00',avail:true},{time:'14:00',avail:false},
+  {time:'15:00',avail:true},{time:'16:00',avail:true},{time:'17:00',avail:true},
+  {time:'18:00',avail:false},{time:'19:00',avail:true},{time:'20:00',avail:true},
+];
+
+function showPage(p){ document.querySelectorAll('.page').forEach(el=>el.classList.remove('active')); document.getElementById('page-'+p).classList.add('active'); window.scrollTo(0,0); }
+function goHome(){ showPage('home'); }
+function tryBooking(){ if(!STATE.user){ document.getElementById('auth-gate').style.display='flex'; } else { showPage('booking'); } }
+function openAuthFromGate(tab){ document.getElementById('auth-gate').style.display='none'; STATE.pendingBooking=true; showPage('auth'); switchAuthTab(tab); }
+function handleAuthNav(){
+  if(STATE.user){ if(confirm('Sign out dari akun '+STATE.user.name+'?')){ STATE.user=null; document.getElementById('nav-auth-link').textContent='Sign In'; goHome(); } }
+  else { showPage('auth'); }
+}
+function switchAuthTab(tab){
+  document.getElementById('tab-signin').classList.toggle('active',tab==='signin');
+  document.getElementById('tab-signup').classList.toggle('active',tab==='signup');
+  document.getElementById('signin-form').style.display=tab==='signin'?'':'none';
+  document.getElementById('signup-form').style.display=tab==='signup'?'':'none';
+  document.getElementById('auth-error').style.display='none';
+  document.getElementById('auth-error-su').style.display='none';
+}
+function afterAuth(){ document.getElementById('nav-auth-link').textContent=STATE.user.name.toUpperCase().split(' ')[0]+' ▾'; STATE.pendingBooking=false; showPage('booking'); }
+function doSignIn(){
+  const email=document.getElementById('si-email').value.trim(), pass=document.getElementById('si-pass').value, err=document.getElementById('auth-error');
+  if(!email||!pass){err.textContent='⚠ Isi semua field ya!';err.style.display='';return;}
+  if(!email.includes('@')){err.textContent='⚠ Email tidak valid';err.style.display='';return;}
+  err.style.display='none'; STATE.user={email,name:email.split('@')[0]}; afterAuth();
+}
+function doSignUp(){
+  const name=document.getElementById('su-name').value.trim(), email=document.getElementById('su-email').value.trim(), phone=document.getElementById('su-phone').value.trim(), pass=document.getElementById('su-pass').value, err=document.getElementById('auth-error-su');
+  if(!name||!email||!phone||!pass){err.textContent='⚠ Isi semua field ya!';err.style.display='';return;}
+  if(pass.length<8){err.textContent='⚠ Password minimal 8 karakter';err.style.display='';return;}
+  err.style.display='none'; STATE.user={email,name}; afterAuth();
+}
+
+function buildCalendar(){
+  const cal=document.getElementById('calendar');
+  const days=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  cal.innerHTML=days.map(d=>`<div class="avail-day-label">${d}</div>`).join('');
+  const today=new Date();
+  for(let i=0;i<today.getDay();i++) cal.innerHTML+=`<div class="avail-day past"></div>`;
+  for(let i=0;i<21;i++){
+    const d=new Date(today); d.setDate(today.getDate()+i);
+    const blocked=[3,7,14].includes(i);
+    const dateStr=d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+    cal.innerHTML+=`<div class="avail-day${blocked?' unavail':''}" data-date="${dateStr}" onclick="pickDate(this,${blocked})">${d.getDate()}</div>`;
+  }
+}
+
+function buildTimeSlots(){
+  document.getElementById('time-slots').innerHTML=TIME_SLOTS.map(s=>
+    `<div class="time-slot${s.avail?'':' full'}" onclick="pickTime(this,'${s.time}',${s.avail})">${s.time}${s.avail?'':' (penuh)'}</div>`
+  ).join('');
+}
+
+function pickConsole(id){
+  document.querySelectorAll('.console-option').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('co-'+id).classList.add('selected');
+  STATE.console=id; STATE.controllers=null;
+  // reset controller UI
+  document.querySelectorAll('.ctrl-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('ctrl-note').textContent='1 controller included. Extra controllers +Rp 5.000/jam each.';
+  // show game list
+  const c=CONSOLES[id];
+  document.getElementById('game-list').innerHTML=c.games.map(g=>`<div class="game-list-item">${g}</div>`).join('');
+  document.getElementById('game-list-wrap').style.display='';
+  document.getElementById('ctrl-picker').style.display='';
+  updateProgress(2); updateSummary();
+}
+
+function pickCtrl(n){
+  document.querySelectorAll('.ctrl-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('ctrl-'+n).classList.add('selected');
+  STATE.controllers=n;
+  const extra=n-1;
+  const note = extra===0
+    ? '1 controller included — no extra charge.'
+    : `1 included + ${extra} extra controller${extra>1?'s':''} (+Rp ${(extra*CTRL_FEE).toLocaleString('id-ID')}/jam)`;
+  document.getElementById('ctrl-note').textContent=note;
+  updateSummary();
+}
+
+function selectConsoleFromHome(id){
+  if(!STATE.user){ STATE.pendingBooking=true; document.getElementById('auth-gate').style.display='flex'; return; }
+  showPage('booking'); setTimeout(()=>pickConsole(id),50);
+}
+
+function pickDur(n){
+  document.querySelectorAll('.dur-btn').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('dur-'+n).classList.add('selected');
+  STATE.duration=n; updateSummary();
+}
+
+function pickDate(el,blocked){
+  if(blocked)return;
+  document.querySelectorAll('.avail-day').forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected'); STATE.date=el.dataset.date; updateSummary();
+}
+
+function pickTime(el,time,avail){
+  if(!avail)return;
+  document.querySelectorAll('.time-slot').forEach(s=>s.classList.remove('selected'));
+  el.classList.add('selected'); STATE.time=time;
+  if(STATE.console) updateProgress(3);
+  updateSummary();
+}
+
+function updateProgress(step){
+  if(step>=2){ document.getElementById('pd1').className='progress-dot done'; document.getElementById('pl1').className='progress-label done'; document.getElementById('pline1').className='progress-line done'; document.getElementById('pd2').className='progress-dot active'; document.getElementById('pl2').className='progress-label active'; }
+  if(step>=3){ document.getElementById('pd2').className='progress-dot done'; document.getElementById('pl2').className='progress-label done'; document.getElementById('pline2').className='progress-line done'; document.getElementById('pd3').className='progress-dot active'; document.getElementById('pl3').className='progress-label active'; }
+}
+
+function formatRp(n){ return 'Rp '+n.toLocaleString('id-ID'); }
+
+function calcTotal(){
+  const c=STATE.console?CONSOLES[STATE.console]:null;
+  if(!c||!STATE.duration) return null;
+  const extraCtrl = STATE.controllers ? (STATE.controllers-1) : 0;
+  return (c.price + extraCtrl * CTRL_FEE) * STATE.duration;
+}
+
+function updateSummary(){
+  const c=STATE.console?CONSOLES[STATE.console]:null;
+  document.getElementById('sum-console').textContent=c?c.icon+' '+c.name:'—';
+  document.getElementById('sum-ctrl').textContent=STATE.controllers?STATE.controllers+' controller'+(STATE.controllers>1?'s':''):'—';
+  document.getElementById('sum-date').textContent=STATE.date||'—';
+  document.getElementById('sum-time').textContent=STATE.time?STATE.time+' WIB':'—';
+  document.getElementById('sum-dur').textContent=STATE.duration?STATE.duration+' jam':'—';
+  const total=calcTotal();
+  document.getElementById('sum-total').textContent=total?formatRp(total):'Rp —';
+}
+
+function proceedToPayment(){
+  if(!STATE.console||!STATE.controllers||!STATE.duration||!STATE.date||!STATE.time){
+    alert('Lengkapi semua pilihan: console, jumlah controller, durasi, tanggal, dan waktu!'); return;
+  }
+  const c=CONSOLES[STATE.console], total=calcTotal();
+  document.getElementById('pay-sum-console').textContent=c.icon+' '+c.name;
+  document.getElementById('pay-sum-ctrl').textContent=STATE.controllers+' controller'+(STATE.controllers>1?'s':'');
+  document.getElementById('pay-sum-time').textContent=STATE.date+' · '+STATE.time+' ('+STATE.duration+' jam)';
+  document.getElementById('pay-sum-total').textContent=formatRp(total);
+  showPage('payment');
+}
+
+function pickPayMethod(m,el){
+  document.querySelectorAll('.pay-tab').forEach(t=>t.classList.remove('active')); el.classList.add('active');
+  ['va','qris','gopay','ovo','cc'].forEach(id=>{ document.getElementById('pay-'+id).style.display=id===m?'':'none'; });
+}
+
+function doPayment(){
+  const code='SZ-'+Math.floor(100000+Math.random()*900000);
+  document.getElementById('booking-code').textContent=code;
+  const c=CONSOLES[STATE.console];
+  document.getElementById('success-detail').textContent=c.name+' · '+STATE.controllers+' ctrl · '+STATE.date+' · '+STATE.time+' · '+STATE.duration+' jam';
+  showPage('success');
+}
+
+buildCalendar();
+buildTimeSlots();
+</script>
+</body>
+</html>
