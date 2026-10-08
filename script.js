@@ -20,7 +20,7 @@ let activeGameSearch = "";
 let activeScheduleFilter = "all";
 
 const DEFAULT_DATA = {
-  whatsappNumber:"6287811030777",
+  whatsappNumber:"6281235014308",
   promoTitle:"Promo Weekend",
   promoBody:"Sewa sekarang dan konfirmasi via WhatsApp admin.",
   runningText:"NINTENDO SWITCH OLED | PLAYBOX READY | BOOKING VIA WHATSAPP | UPDATE REALTIME",
