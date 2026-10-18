@@ -278,7 +278,7 @@ function setupPixelTimePicker(){
   if(!jamEl || !menitEl) return;
 
   if(jamEl.options.length <= 1){
-    for(let i = 10; i < 19; i++){
+    for(let i = 8; i < 19; i++){
       const val = String(i).padStart(2, "0");
       jamEl.innerHTML += `<option value="${val}">${val}</option>`;
     }
